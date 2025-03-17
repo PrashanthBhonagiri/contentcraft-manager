@@ -97,14 +97,14 @@ export const ComponentService = {
         try {
             console.log('Sending component data:', componentData);
 
-            const payload = {
-                title: componentData.title,
-                type: componentData.type,
-                content: componentData.content,
-                status: componentData.status || 'draft',
-            };
+            // const payload = {
+            //     title: componentData.title,
+            //     type: componentData.type,
+            //     content: componentData.content,
+            //     status: componentData.status || 'draft',
+            // };
 
-            const response = await apiClient.post('/components', payload);
+            const response = await apiClient.post('/components', componentData);
             console.log("response.data = " + response.data);
             return response.data;
         } catch (error) {
@@ -129,5 +129,22 @@ export const ComponentService = {
     deleteComponent: async (id) => {
       const response = await apiClient.delete(`/components/${id}`);
       return response.data;
-    }
+    },
+
+    // Save file reference to backend
+    saveFileReference: async ({ type, fileData }) => {
+      console.log("In saveFileReference  " +  type);
+      console.log("fileData " + fileData);
+      
+      try {
+        const response = await apiClient.post('/components/files', {
+          type,
+          fileData
+        });
+        return response.data;
+      } catch (error) {
+        console.error('Error saving file reference:', error);
+        throw error;
+      }
+    },
   };

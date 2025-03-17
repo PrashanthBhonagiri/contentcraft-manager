@@ -13,7 +13,7 @@ import ComponentPreview from '../components/shared/ComponentPreview';
 import { COMPONENT_TYPE_DETAILS, COMPONENT_TYPES } from '../constants/componentTypes';
 import { COMPONENT_FIELDS } from '../constants/componentInterfaces';
 import { ComponentService } from '../services/api';
-
+import FileUpload from '../components/shared/FileUpload';
 
 const CreateComponentPage = () => {
   const navigate = useNavigate();
@@ -23,7 +23,10 @@ const CreateComponentPage = () => {
   const [formData, setFormData] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
+  const [uploadedFiles, setUploadedFiles] = useState({
+    featuredImage: null,
+    attachments: []
+  });
 
   useEffect(() => {
     const type = searchParams.get('type');
@@ -46,53 +49,62 @@ const CreateComponentPage = () => {
       const componentData = {
         title: formData.title,
         type: selectedType,
-        content: {}, // Initialize content object
+        content: {
+          body: formData.content,
+          excerpt: formData.excerpt || ''
+        },
+        metadata: {
+          featuredImage: uploadedFiles.featuredImage,
+          attachments: uploadedFiles.attachments
+        },
         status: 'draft'
       };
+      console.log('Submitting component data:', componentData);
 
-      switch (selectedType) {
-        case 'post':
-          componentData.content = {
-            body: formData.content,
-            excerpt: formData.excerpt || '',
-            featuredImage: formData.featuredImage || null,
-            attachments: formData.attachments || []
-          };
-          break;
 
-        case 'event':
-          componentData.content = {
-            description: formData.content,
-            startDate: formData.startDate,
-            endDate: formData.endDate,
-            location: formData.location,
-            eventImage: formData.eventImage
-          };
-          break;
+      // switch (selectedType) {
+      //   case 'post':
+      //     componentData.content = {
+      //       body: formData.content,
+      //       excerpt: formData.excerpt || '',
+      //       featuredImage: formData.featuredImage || null,
+      //       attachments: formData.attachments || []
+      //     };
+      //     break;
 
-        case 'gallery':
-          componentData.content = {
-            description: formData.description,
-            images: formData.images || []
-          };
-          break;
+      //   case 'event':
+      //     componentData.content = {
+      //       description: formData.content,
+      //       startDate: formData.startDate,
+      //       endDate: formData.endDate,
+      //       location: formData.location,
+      //       eventImage: formData.eventImage
+      //     };
+      //     break;
 
-        case 'form':
-          componentData.content = {
-            description: formData.description,
-            fields: formData.formFields || []
-          };
-          break;
+      //   case 'gallery':
+      //     componentData.content = {
+      //       description: formData.description,
+      //       images: formData.images || []
+      //     };
+      //     break;
 
-        default:
-          throw new Error('Invalid component type');
-      }
+      //   case 'form':
+      //     componentData.content = {
+      //       description: formData.description,
+      //       fields: formData.formFields || []
+      //     };
+      //     break;
 
-      console.log('Prepared component data:', componentData);
+      //   default:
+      //     throw new Error('Invalid component type');
+      // }
+
+      // console.log('Prepared component data:', componentData);
 
       // Send to backend
       const result = await ComponentService.createComponent(componentData);
-      console.log('Creation result:', result);
+      console.log('Component Creation result:', result);
       navigate('/components');
     } catch (err) {
       setError('Failed to create component');
@@ -101,6 +113,65 @@ const CreateComponentPage = () => {
       setLoading(false);
     }
   };
+
+  const handleFeaturedImageUpload = async (fileData) => {
+    // console.log("form data before " + formData);
+    // console.dir(formData);
+    // console.log("featuredImage before = " + formData.featuredImage);
+    
+    // setFormData(prev => ({
+    //   ...prev,
+    //   featuredImage: fileData
+    // }));
+
+    // console.log("form data after " + formData);
+    // console.dir(formData);
+    // console.log("featuredImage after = " + formData.featuredImage);
+    
+    try {
+      console.log("in handleFeaturedImageUpload");
+      
+      // First, update the UI with the uploaded file
+      setUploadedFiles(prev => ({
+        ...prev,
+        featuredImage: fileData
+      }));
+
+      // Then, make API call to save the file reference
+      await ComponentService.saveFileReference({
+        type: 'featuredImage',
+        fileData: fileData
+      });
+
+    } catch (error) {
+      console.error('Error saving featured image:', error);
+      setError('Failed to save featured image reference');
+    }
+
+  };
+
+  const handleAttachmentsUpload = async (filesData) => {
+    try {
+      console.log("in handleAttachmentsUpload");
+      
+      // Update UI with new attachments
+      setUploadedFiles(prev => ({
+        ...prev,
+        attachments: [...prev.attachments, ...filesData]
+      }));
+
+      // Save each attachment reference
+      await ComponentService.saveFileReference({
+        type: 'attachment',
+        fileData: filesData
+      });
+
+    } catch (error) {
+      console.error('Error saving attachments:', error);
+      setError('Failed to save attachment references');
+    }
+  };
+
 
   const handlePreview = (formData) => {
     setFormData(formData);
@@ -198,24 +269,53 @@ const CreateComponentPage = () => {
       case 'multipleImages':
       case 'image':
         return (
-          <Upload
-            {...others}
-            restrictions={{
-              allowedExtensions: ['.jpg', '.jpeg', '.png', '.gif'],
-              maxFileSize: 5242880
-            }}
-          />
+          <div className="form-group">
+            <label className="k-label">{fieldProps.label}</label>
+            <FileUpload
+              onUploadComplete={handleFeaturedImageUpload}
+              allowedExtensions={['.jpg', '.jpeg', '.png', '.gif']}
+              multiple={false}
+              maxFileSize={5242880} // 5MB
+            />
+            {formData.featuredImage && (
+              <div className="image-preview">
+                <img 
+                  src={formData.featuredImage.url} 
+                  alt="Featured" 
+                  style={{ maxWidth: '200px' }} 
+                />
+              </div>
+            )}
+          </div>
         );
   
       case 'files':
         return (
-          <Upload
-            {...others}
-            multiple={true}
-            restrictions={{
-              maxFileSize: 10485760
-            }}
-          />
+          <div className="form-group">
+            <label className="k-label">{fieldProps.label}</label>
+            <FileUpload
+              onUploadComplete={handleAttachmentsUpload}
+              allowedExtensions={['.jpg', '.jpeg', '.png', '.gif', '.pdf', '.doc', '.docx']}
+              multiple={true}
+              maxFileSize={10485760} // 10MB
+            />
+            {formData.attachments && formData.attachments.length > 0 && (
+              <div className="attachments-preview">
+                {formData.attachments.map((file, index) => (
+                  <div key={index} className="attachment-item">
+                    {file.fileType.match(/(jpg|jpeg|png|gif)$/) ? (
+                      <img src={file.url} alt={file.originalName} />
+                    ) : (
+                      <div className="file-icon">
+                        <i className="k-icon k-i-file" />
+                        <span>{file.originalName}</span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         );
   
       default:
@@ -272,14 +372,6 @@ const CreateComponentPage = () => {
             : 'Select Component Type'
           }
         </h2>
-        {/* <div className="page-actions">
-          <Button 
-            icon="eye"
-            onClick={() => handlePreview(formData)}
-          >
-            Preview
-          </Button>
-        </div> */}
         {selectedType && <Button onClick={() => navigate('/components')}>Cancel</Button>}
       </div>
 
