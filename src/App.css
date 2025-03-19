@@ -704,3 +704,48 @@
 .k-progressbar .k-progress-status {
   display: none;
 }
+.collection-form-container {
+  padding: 20px;
+}
+
+.collection-form-section {
+  margin-bottom: 40px;
+}
+
+.collection-groups-section {
+  margin-top: 40px;
+  border-top: 1px solid #dee2e6;
+  padding-top: 20px;
+}
+
+.group-management {
+  margin-top: 20px;
+}
+
+.group-item {
+  margin-bottom: 30px;
+  padding: 20px;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  background-color: #f8f9fa;
+}
+
+.group-item h4 {
+  margin-bottom: 15px;
+  color: #495057;
+}
+
+.k-dialog-wrapper .k-dialog {
+  min-width: 600px;
+}
+
+.k-grid {
+  margin-top: 15px;
+}
+
+.group-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+}
