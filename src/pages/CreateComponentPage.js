@@ -31,11 +31,19 @@ const CreateComponentPage = () => {
   useEffect(() => {
     const type = searchParams.get('type');
     if (type && COMPONENT_TYPES[type.toUpperCase()]) {
+      if (type.toLowerCase() !== 'post') {
+        navigate('/coming-soon'); // Redirect to coming soon page
+        return;
+      }
       setSelectedType(type);
     }
   }, [searchParams]);
 
   const handleTypeSelection = (type) => {
+    if (type.toLowerCase() !== 'post') {
+      navigate('/coming-soon');
+      return;
+    }
     navigate(`/components/create?type=${type}`);
     setSelectedType(type);
   };
