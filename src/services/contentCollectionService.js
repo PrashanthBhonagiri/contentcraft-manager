@@ -1,9 +1,10 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api/content-collections';
+const API_BASEURL = process.env.NODE_ENV==='development' ? process.env.REACT_APP_API_BASE_LOCAL_URL : process.env.REACT_APP_API_BASE_URL;
+const API_URL = `${API_BASEURL}/api/content-collections`;
 
 export const ContentCollectionService = {
-  getAllCollections: async () => {
+  getAllCollections: async () => {    
     const response = await axios.get(API_URL);
     return response.data;
   },
