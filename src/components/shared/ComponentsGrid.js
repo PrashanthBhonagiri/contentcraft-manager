@@ -49,6 +49,43 @@ const ComponentsGrid = ({ data, onStatusChange, allowEdit = true }) => {
     );
   };
 
+  const formatTimeAgo = (timestamp) => {
+    const now = new Date();
+    const date = new Date(timestamp);
+    const diffInSeconds = Math.floor((now - date) / 1000);
+    const diffInDays = Math.floor(diffInSeconds / (24 * 60 * 60));
+  
+    // If more than 90 days, return date in DD-MM-YYYY format
+    if (diffInDays > 90) {
+      return date.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      }).replace(/\//g, '-');
+    }
+  
+    // Less than a minute
+    if (diffInSeconds < 60) {
+      return 'just now';
+    }
+  
+    // Less than an hour
+    if (diffInSeconds < 3600) {
+      const minutes = Math.floor(diffInSeconds / 60);
+      return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ago`;
+    }
+  
+    // Less than a day
+    if (diffInSeconds < 86400) {
+      const hours = Math.floor(diffInSeconds / 3600);
+      return `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`;
+    }
+  
+    // Days
+    return `${diffInDays} ${diffInDays === 1 ? 'day' : 'days'} ago`;
+  };
+  
+
   return (
     <Grid
       data={data}
@@ -76,7 +113,9 @@ const ComponentsGrid = ({ data, onStatusChange, allowEdit = true }) => {
       <GridColumn 
         field="updatedAt" 
         title="Last Updated" 
-        format="{0:dd MMM yyyy}"
+        cell={(props) => (
+          <td>{formatTimeAgo(props.dataItem.updatedAt)}</td>
+        )}
       />
       {/* <GridColumn title="Actions" cell={ActionCell} /> */}
     </Grid>
