@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { PanelBar, PanelBarItem } from "@progress/kendo-react-layout";
+import {homeIcon, folderMoreIcon, gridIcon } from '@progress/kendo-svg-icons';
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -9,39 +10,35 @@ const Sidebar = () => {
   const menuItems = [
     {
       text: 'Dashboard',
-      icon: 'home',
+      svgIcon: homeIcon,
       path: '/',
     },
     {
       text: 'Components',
-      icon: 'grid',
+      svgIcon: gridIcon,
       path: '/components',
     },
-  ];
-  const handleSelect = (e) => {
-    // console.log("handleSelect");
-    
-    const path = e.target.props.path;
-    // console.log(e.target);
-    // console.log(e.target.props);
-    // console.log(path);
-    
-    if (path) {
-      navigate(path);
+    {
+      text: 'content collection',
+      svgIcon: folderMoreIcon,
+      path: '/content-collections',
     }
-  };
+  ];
+
+  const onSelect = (event) => {
+    navigate(event.target.props.route);
+};
 
   return (
     <div className="sidebar">
-      <PanelBar onSelect={handleSelect}>
+      <PanelBar onSelect={onSelect}>
         {menuItems.map((item) => (
           <PanelBarItem
             key={item.text}
             title={item.text}
-            icon={item.icon}
-            selected={location.pathname === item.path}
-            onClick={() => navigate(item.path)}
-            
+            svgIcon={item.svgIcon}
+            selected={location.pathname.startsWith(item.path)}
+            route={item.path}
           />
         ))}
       </PanelBar>
