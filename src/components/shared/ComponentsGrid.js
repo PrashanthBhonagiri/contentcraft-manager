@@ -52,8 +52,8 @@ const ComponentsGrid = ({ data, onStatusChange, allowEdit = true }) => {
   return (
     <Grid
       data={data}
-      sortable={true}
-      filterable={true}
+      // sortable={true}
+      // filterable={true}
       pageable={{ pageSizes: true }}
     >
       <GridColumn field="title" title="Title" />
@@ -64,7 +64,7 @@ const ComponentsGrid = ({ data, onStatusChange, allowEdit = true }) => {
           <td>{COMPONENT_TYPE_DETAILS[props.dataItem.type]?.title}</td>
         )}
       />
-      <GridColumn
+      {/* <GridColumn
         field="status"
         title="Status"
         cell={(props) => (
@@ -72,13 +72,13 @@ const ComponentsGrid = ({ data, onStatusChange, allowEdit = true }) => {
             <ComponentStatus status={props.dataItem.status} />
           </td>
         )}
-      />
+      /> */}
       <GridColumn 
         field="updatedAt" 
         title="Last Updated" 
         format="{0:dd MMM yyyy}"
       />
-      <GridColumn title="Actions" cell={ActionCell} />
+      {/* <GridColumn title="Actions" cell={ActionCell} /> */}
     </Grid>
   );
 };
